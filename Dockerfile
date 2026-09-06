@@ -3,30 +3,16 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    curl wget git build-essential cmake \
-    libevent-dev libncurses-dev libjson-c-dev libwebsockets-dev \
+    curl wget git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install tmux
-RUN wget -q https://github.com/tmux/tmux/releases/download/3.4/tmux-3.4.tar.gz \
-    && tar -xzf tmux-3.4.tar.gz \
-    && cd tmux-3.4 && ./configure && make && make install \
-    && cd .. && rm -rf tmux-3.4 tmux-3.4.tar.gz
+# Install ttyd from pre-built binary
+RUN wget -qO /usr/local/bin/ttyd https://github.com/nicm/ttyd/releases/download/1.7.7/ttyd.x86_64 \
+    && chmod +x /usr/local/bin/ttyd
 
-# Install ttyd
-RUN git clone https://github.com/nicm/ttyd.git /tmp/ttyd \
-    && cd /tmp/ttyd && mkdir build && cd build \
-    && cmake .. && make && make install \
-    && cd / && rm -rf /tmp/ttyd
-
-# Install Bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:$PATH"
-
-# Install OpenCode
-RUN git clone https://github.com/anomalyco/opencode.git /opt/opencode
-WORKDIR /opt/opencode
-RUN bun install --production
+# Install OpenCode via official installer
+RUN curl -fsSL https://opencode.ai/install | bash
+ENV PATH="/root/.opencode/bin:$PATH"
 
 # Setup workspace
 RUN mkdir -p /workspace /root/.config/opencode /root/.local/share/opencode
