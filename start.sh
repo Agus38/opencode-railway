@@ -23,7 +23,7 @@ if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_
 fi
 
 # Start ttyd on Railway's assigned PORT
-exec ttyd -p "$PORT" --writable \
+exec ttyd -p "$PORT" --writable --credential user:server38 \
     -t fontSize=14 \
     -t fontFamily="monospace" \
     -t theme='{"background":"#1a1b26","foreground":"#a9b1d6"}' \
