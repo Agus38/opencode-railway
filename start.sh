@@ -1,26 +1,10 @@
 #!/bin/bash
-# Start ttyd + nginx with basic auth
+# Start ttyd on internal port + nginx on external port with basic auth
 
 PORT=${PORT:-8080}
 
-# Set default API key if not provided
-if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
-    echo "=========================================="
-    echo "  OpenCode - AI Coding Assistant"
-    echo "=========================================="
-    echo ""
-    echo "  API Key belum dikonfigurasi!"
-    echo ""
-    echo "  Silakan set environment variable di Railway:"
-    echo "  - OPENAI_API_KEY=sk-xxx"
-    echo "  - ANTHROPIC_API_KEY=sk-ant-xxx"
-    echo "  - GOOGLE_API_KEY=xxx"
-    echo ""
-    echo "  Atau jalankan opencode lalu set manual:"
-    echo "  export OPENAI_API_KEY=sk-xxx"
-    echo ""
-    echo "=========================================="
-fi
+echo "=== OpenCode Terminal ==="
+echo "External port: $PORT"
 
 # Start ttyd on internal port 7681
 ttyd -p 7681 --writable \
@@ -30,7 +14,7 @@ ttyd -p 7681 --writable \
     -t cursorBlink=true \
     bash -c 'export PATH="/root/.opencode/bin:$PATH" && cd /workspace && exec bash' &
 
-# Update nginx to listen on Railway's PORT
+# Update nginx to listen on Railway's assigned port
 sed -i "s/listen 8080/listen $PORT/" /etc/nginx/sites-available/default
 
 # Start nginx in foreground
