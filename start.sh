@@ -1,7 +1,7 @@
 #!/bin/bash
-# Start web terminal with OpenCode
+# Start ttyd + nginx with basic auth
 
-PORT=${PORT:-7681}
+PORT=${PORT:-8080}
 
 # Set default API key if not provided
 if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
@@ -22,10 +22,16 @@ if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_
     echo "=========================================="
 fi
 
-# Start ttyd on Railway's assigned PORT
-exec ttyd -p "$PORT" --writable --credential user:server38 \
+# Start ttyd on internal port 7681
+ttyd -p 7681 --writable \
     -t fontSize=14 \
     -t fontFamily="monospace" \
     -t theme='{"background":"#1a1b26","foreground":"#a9b1d6"}' \
     -t cursorBlink=true \
-    bash -c 'export PATH="/root/.opencode/bin:$PATH" && cd /workspace && exec bash'
+    bash -c 'export PATH="/root/.opencode/bin:$PATH" && cd /workspace && exec bash' &
+
+# Update nginx to listen on Railway's PORT
+sed -i "s/listen 8080/listen $PORT/" /etc/nginx/sites-available/default
+
+# Start nginx in foreground
+exec nginx -g "daemon off;"
