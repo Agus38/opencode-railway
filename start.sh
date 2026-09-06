@@ -1,6 +1,8 @@
 #!/bin/bash
 # Start web terminal with OpenCode
 
+PORT=${PORT:-7681}
+
 # Set default API key if not provided
 if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
     echo "=========================================="
@@ -20,10 +22,10 @@ if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$GOOGLE_API_
     echo "=========================================="
 fi
 
-# Start ttyd with bash
-exec ttyd -p 7681 \
+# Start ttyd on Railway's assigned PORT
+exec ttyd -p "$PORT" --writable \
     -t fontSize=14 \
     -t fontFamily="monospace" \
     -t theme='{"background":"#1a1b26","foreground":"#a9b1d6"}' \
     -t cursorBlink=true \
-    bash -c 'cd /workspace && exec bash'
+    bash -c 'export PATH="/root/.opencode/bin:$PATH" && cd /workspace && exec bash'
