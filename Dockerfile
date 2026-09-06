@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install ttyd from pre-built binary
-RUN wget -qO /usr/local/bin/ttyd https://github.com/nicm/ttyd/releases/download/1.7.7/ttyd.x86_64 \
+RUN wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 \
     && chmod +x /usr/local/bin/ttyd
 
 # Install OpenCode via official installer
