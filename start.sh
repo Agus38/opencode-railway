@@ -10,7 +10,7 @@ echo "Internal port: 8000"
 # Start Agent Canvas in background on 8000
 echo "Starting agent-canvas..."
 mkdir -p /workspace /root/.openhands
-agent-canvas &
+agent-canvas --port 8000 &
 AGENT_PID=$!
 echo "agent-canvas PID $AGENT_PID"
 
