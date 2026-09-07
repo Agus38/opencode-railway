@@ -3,26 +3,26 @@ FROM node:22-bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    curl wget git nginx apache2-utils python3-pip \
+    curl wget git nginx apache2-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv (required by agent-canvas)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
+# Install ttyd
+RUN wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 \
+    && chmod +x /usr/local/bin/ttyd
 
-# Install OpenHands Agent Canvas
-RUN npm install -g @openhands/agent-canvas@1.16.0
+# Install Codex CLI + OpenCode (fallback)
+RUN npm install -g @openai/codex
 
-# Create nginx basic auth (user: server38)
+# Basic auth user:server38
 RUN htpasswd -cb /etc/nginx/.htpasswd user server38
 
-# Nginx reverse proxy with basic auth -> agent-canvas on 8000
+# Nginx reverse proxy -> ttyd 7681
 RUN printf 'server {\n\
     listen 8080;\n\
     location / {\n\
-        auth_basic "OpenHands - Access Code: server38 (user/server38)";\n\
+        auth_basic "Codex Terminal - user/server38";\n\
         auth_basic_user_file /etc/nginx/.htpasswd;\n\
-        proxy_pass http://127.0.0.1:8000;\n\
+        proxy_pass http://127.0.0.1:7681;\n\
         proxy_http_version 1.1;\n\
         proxy_set_header Upgrade $http_upgrade;\n\
         proxy_set_header Connection "upgrade";\n\
@@ -31,12 +31,10 @@ RUN printf 'server {\n\
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
         proxy_set_header X-Forwarded-Proto $scheme;\n\
         proxy_read_timeout 86400;\n\
-        proxy_send_timeout 86400;\n\
     }\n\
 }\n' > /etc/nginx/sites-available/default
 
-# Setup workspace
-RUN mkdir -p /workspace /root/.openhands
+RUN mkdir -p /workspace /root/.codex
 WORKDIR /workspace
 
 COPY start.sh /start.sh
